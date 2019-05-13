@@ -25,41 +25,62 @@ namespace Coordinator.Controllers
         [HttpGet("{key}")]
         public async Task<IActionResult> Get(string key, SrnDto value)
         {
-            var srn = (Srn)key;
+            try
+            {
+                var srn = (Srn) key;
 
-            if (string.IsNullOrWhiteSpace(srn.Namespace))
-                return BadRequest(new { message = "Bulk retrieving namespaces is not currently supported." });
+                if (string.IsNullOrWhiteSpace(srn.Namespace))
+                    throw new SrnException("Bulk retrieving namespaces is not currently supported.");
 
-            return Json(value.Providers != null
-                ? await _service.GetAsync(srn, value.Providers)
-                : await _service.GetAsync(srn, value.Provider));
+                return Json(value.Providers != null
+                    ? await _service.GetAsync(srn, value.Providers)
+                    : await _service.GetAsync(srn, value.Provider));
+            }
+            catch (SrnException e)
+            {
+                return BadRequest(new { e.Message });
+            }
         }
 
         // PUT api/v0/config/urn:srn:v0:discovery.v4.enabled
         [HttpPut("{key}")]
         public async Task<IActionResult> Put(string key, SrnDto value)
         {
-            if (value.Data == null)
-                return BadRequest(new { message = "SRN data must not be null. Use the Delete method to remove a value." });
+            try
+            {
+                if (value.Data == null)
+                    throw new SrnException("SRN data must not be null. Use the Delete method to remove a value.");
 
-            var srn = (Srn)key;
-            if (!srn.HasNamespace() || !srn.HasKey())
-                return BadRequest(new { message = "Updating SRN data in bulk is not currently supported." });
+                var srn = (Srn)key;
+                if (!srn.HasNamespace() || !srn.HasKey())
+                    throw new SrnException("Updating SRN data in bulk is not currently supported.");
 
-            await _service.SetAsync(srn, value.Data, value.Provider);
-            return Ok();
+                await _service.SetAsync(srn, value.Data, value.Provider);
+                return Ok();
+            }
+            catch (SrnException e)
+            {
+                return BadRequest(new { e.Message });
+            }
         }
 
         // DELETE api/v0/config/urn:srn:v0:discovery.v4.enabled
         [HttpDelete("{key}")]
         public async Task<IActionResult> Delete(string key, SrnDto value)
         {
-            var srn = (Srn)key;
-            if (string.IsNullOrWhiteSpace(srn.Namespace))
-                return BadRequest(new { message = "No namespace or key was provided to delete." });
+            try
+            {
+                var srn = (Srn)key;
+                if (string.IsNullOrWhiteSpace(srn.Namespace))
+                    throw new SrnException("No namespace or key was provided to delete.");
 
-            await _service.DeleteAsync(srn, value.Provider);
-            return Ok();
+                await _service.DeleteAsync(srn, value.Provider);
+                return Ok();
+            }
+            catch (SrnException e)
+            {
+                return BadRequest(new { e.Message });
+            }
         }
     }
 }

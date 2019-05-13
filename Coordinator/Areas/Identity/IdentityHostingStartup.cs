@@ -2,6 +2,9 @@
 using Coordinator.Areas.Identity.Data;
 using Coordinator.Models;
 using Coordinator.Models.Database;
+using Coordinator.Services;
+using Coordinator.Services.Options;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +15,7 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 [assembly: HostingStartup(typeof(Coordinator.Areas.Identity.IdentityHostingStartup))]
@@ -30,27 +34,25 @@ namespace Coordinator.Areas.Identity
                 });
 
                 services.AddDbContext<IdentityContext>();
+                services.AddSingleton<ApiSecurityService>();
 
                 // Add the default identity provider
                 services.AddDefaultIdentity<User>()
                     .AddDefaultUI(UIFramework.Bootstrap4)
                     .AddEntityFrameworkStores<IdentityContext>();
-
-                /**
-                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(options =>
-                    {
-                        options.TokenValidationParameters = new TokenValidationParameters
+                services.AddAuthentication(options =>
                         {
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            ValidateLifetime = true,
-                            ValidateIssuerSigningKey = true,
-                            ValidIssuer = "rack.coordinator",
-                            ValidAudience = "rack.coordinator",
-                            IssuerSigningKey = "abcd", // TODO
-                        };
-                    });*/
+                            options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                            options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+                        })
+                    .AddJwtBearer();
+
+                // Add configuration providers
+                services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerConfigureOptions>();
+
+                services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                services.AddSingleton<IAuthenticationSchemeProvider, CoordinatorSchemeProvider>();
 
                 services.ConfigureApplicationCookie(options =>
                 {

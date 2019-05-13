@@ -1,15 +1,13 @@
 ﻿@page
-@model ApiTokensModel
 @{
     ViewData["Title"] = "API Tokens";
     ViewData["ActivePage"] = ManageNavPages.ApiTokens;
 }
 
 <h4>@ViewData["Title"]</h4>
-<partial name="_StatusMessage" for="StatusMessage" />
 <div class="row">
     <div class="container">
-        <table class="table">
+        <table class="table" id="tokenTable">
             <thead>
                 <tr>
                     <th scope="col">Expiry</th>
@@ -18,41 +16,40 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var token in Model.ApiTokens)
-                {
-                    <tr>
-                        <td>@token.Expiry</td>
-                        <td>@token.Notes</td>
-                        <td><button class="btn btn-danger" onclick="deleteToken(@token.Id)">Delete</button></td>
-                    </tr>
-                }
             </tbody>
         </table>
         <button class="btn btn-success" id="newTokenBtn" onclick="newToken()">New Token</button>
     </div>
 </div>
 
-<div class="modal fade" id="apiTokenModal" tabindex="-1" role="dialog">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="apiTokenModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form id="create-key-form" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title">New API token</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+            <div class="modal-header">
+                <h5 class="modal-title">New API token</h5>
+            </div>
 
-                <div class="modal-body">
-                    <p>Copy the token. For security reasons, it will only be shown once.</p>
-                    <!--<label asp-for="Input.Token"></label>-->
-                    <input class="form-control" id="newTokenField" disabled />
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary">Create</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="newTokenField">Token</label>
+                        <input class="form-control" id="newTokenField" disabled />
+                        <small class="form-text text-muted">For security reasons, this token will only be shown once.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="newTokenExpiry">Expiry</label>
+                        <input class="form-control" id="newTokenExpiry" type="datetime-local" />
+                    </div>
+                    <div class="form-group">
+                        <label for="newTokenNotes">Notes</label>
+                        <input class="form-control" id="newTokenNotes" type="text" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="apiTokenModalCreate">Create</button>
+                <button type="button" class="btn btn-secondary" id="apiTokenModalCancel">Cancel</button>
+            </div>
         </div>
     </div>
 </div>
@@ -60,22 +57,102 @@
 @Html.AntiForgeryToken()
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
     <script type="text/javascript">
+        function fullRefresh() {
+            $.ajax({
+                url: "/api/v0/Token/All",
+                type: "GET",
+                dataType: "json",
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (data) {
+                    data.forEach(addTokenToTable);
+                }
+            });
+        }
+
+        function addTokenToTable(token) {
+            // Add the row to the table
+            var row = document.getElementById("tokenTable").insertRow();
+            var idRow = row.insertCell(0);
+            idRow.innerHTML = token.id;
+            idRow.style = "display:none;";
+
+            if (token.expiry === undefined) {
+                row.insertCell(1).innerHTML = token.expiry;
+            } else {
+                row.insertCell(1).innerHTML = "∞";
+            }
+            
+            row.insertCell(2).innerHTML = token.notes;
+            row.insertCell(3).innerHTML = '<button class="btn btn-danger" onclick="deleteToken(' + token.id + ')">Revoke</button>';
+        }
+
         function newToken() {
             $.ajax({
-                url: "?handler=Generate",
+                url: "/api/v0/Token",
                 type: "POST",
                 dataType: "json",
                 headers: {
                     RequestVerificationToken:
                         $('input:hidden[name="__RequestVerificationToken"]').val()
                 },
-                success: function(data) {
+                success: function (data) {
                     $('#newTokenField').val(data["token"]);
                     $('#apiTokenModal').modal('show');
+
+                    $('#apiTokenModalCreate').click(function () {
+                        data.expiry = $('#newTokenExpiry').val();
+                        data.notes = $('#newTokenNotes').val();
+                        updateToken(data);
+                        addTokenToTable(data);
+
+                        $('#apiTokenModalCreate').off('click');
+                        $('#apiTokenModal').modal('hide');
+                    });
+
+                    $('#apiTokenModalCancel').click(function () {
+                        deleteToken(data.id);
+
+                        $('#apiTokenModalCancel').off('click');
+                        $('#apiTokenModal').modal('hide');
+                    });
                 }
             });
         }
+
+        function updateToken(token) {
+            $.ajax({
+                url: "/api/v0/Token",
+                type: "PUT",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(token),
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                }
+            });
+        }
+
+        function deleteToken(id) {
+            $.ajax({
+                url: "/api/v0/Token",
+                type: "DELETE",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ id: id }),
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (data) {
+                    $('#tokenTable tr td:contains(' + id + ')').parent().remove();
+                }
+            });
+        }
+
+        fullRefresh();
     </script>
 }

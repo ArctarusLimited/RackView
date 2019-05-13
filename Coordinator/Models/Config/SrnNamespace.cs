@@ -29,7 +29,7 @@ namespace Coordinator.Models.Config
             var srn = new Srn { Namespace = _nameSpace, Key = key };
 
             // System namespace forces the JSON provider
-            if (_nameSpace == "system" && !key.StartsWith("security"))
+            if (_nameSpace == "system" && key != null && !key.StartsWith("security"))
                 return await _repository.GetProvider("json").GetAsync(srn);
 
             // If we're not looking for all just return a specific result.
@@ -37,7 +37,7 @@ namespace Coordinator.Models.Config
                 return await _repository.GetProvider(providers.SingleOrDefault()).GetAsync(srn);
 
             if (!srn.HasNamespace() || !srn.HasKey())
-                throw new Exception("Bulk queries support fully qualified SRNs only.");
+                throw new SrnException("Bulk queries support fully qualified SRNs only.");
 
             // This is the code that merges results together from all providers into one result.
             // The code will always return the first instance of a result. Duplicates are ignored.

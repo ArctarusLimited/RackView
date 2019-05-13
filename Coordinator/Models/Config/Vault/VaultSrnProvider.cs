@@ -31,39 +31,54 @@ namespace Coordinator.Models.Config.Vault
 
         public async Task<dynamic> GetAsync(Srn srn)
         {
-            // List all namespaces
-            if (!srn.HasNamespace())
-                return (await _engine.ReadSecretPathsAsync("/", _mountPoint))?.Data.Keys;
+            return await ExecuteVaultContext(async () =>
+            {
+                // List all namespaces
+                if (!srn.HasNamespace())
+                    return (await _engine.ReadSecretPathsAsync("/", _mountPoint))?.Data.Keys;
 
-            // List all keys in namespace (non-recursive, though!)
-            if (!srn.HasKey())
-                return (await _engine.ReadSecretPathsAsync($"/{srn.Namespace}", _mountPoint))?.Data.Keys;
+                // List all keys in namespace (non-recursive, though!)
+                if (!srn.HasKey())
+                    return (await _engine.ReadSecretPathsAsync($"/{srn.Namespace}", _mountPoint))?.Data.Keys;
 
-            // Return the actual key
+                return (await _engine.ReadSecretAsync(GetKeyPath(srn), null, _mountPoint))?.Data.Data;
+            });
+        }
+
+        public async Task SetAsync(Srn srn, dynamic value)
+        {
+            srn.ThrowIfNotFullyQualified();
+            await ExecuteVaultContext(async () => await _engine.WriteSecretAsync(GetKeyPath(srn), value, null, _mountPoint));
+        }
+
+        public async Task DeleteAsync(Srn srn)
+        {
+            // TODO: need to find out how to get version
+            if (!srn.HasNamespace()) throw new SrnException("Performing a mount point reset is not yet supported.");
+            await ExecuteVaultContext(async () =>
+                {
+                    await _engine.DestroySecretAsync(GetKeyPath(srn), new List<int> {0}, _mountPoint);
+                    return Task.CompletedTask;
+                });
+        }
+
+        private static async Task<dynamic> ExecuteVaultContext(Func<Task<dynamic>> action)
+        {
             try
             {
-                return (await _engine.ReadSecretAsync(GetKeyPath(srn), null, _mountPoint))?.Data.Data;
+                return await action.Invoke();
             }
             catch (VaultApiException e)
             {
                 if (e.HttpStatusCode == HttpStatusCode.NotFound) return null;
 
                 // Bad stuff
-                throw;
+                throw new SrnException("Vault encountered an internal error.", e);
             }
-        }
-
-        public async Task SetAsync(Srn srn, dynamic value)
-        {
-            srn.ThrowIfNotFullyQualified();
-            await _engine.WriteSecretAsync(GetKeyPath(srn), value, null, _mountPoint);
-        }
-
-        public async Task DeleteAsync(Srn srn)
-        {
-            if (!srn.HasNamespace()) throw new Exception("Performing a mount point reset is not yet supported.");
-            await _engine.DestroySecretAsync(GetKeyPath(srn), new List<int> { 0 }, _mountPoint);
-            // TODO: need to find out how to get version
+            catch (Exception e)
+            {
+                throw new SrnException("Failed to connect to Vault.", e);
+            }
         }
 
         private static string GetKeyPath(Srn srn) => $"{srn.Namespace}/{srn.Key.Replace('.', '/')}";

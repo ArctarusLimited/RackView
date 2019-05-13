@@ -24,14 +24,10 @@ namespace Coordinator.Controllers
         private readonly IdentityContext _context;
         private readonly SigningCredentials _credentials;
 
-        public JwtController(IdentityContext context, ISrnRepository repository)
+        public JwtController(IdentityContext context, ApiSecurityService security)
         {
             _context = context;
-            var result = repository.System.GetAsync("security.api.token", new[] {"default", "vault"}).GetAwaiter().GetResult();
-            if (result == null) throw new Exception("Unable to initialise JWT controller. Security key not found.");
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(result["key"]));
-            _credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+            _credentials = new SigningCredentials(security.SecurityKey, SecurityAlgorithms.HmacSha256Signature);
         }
 
         [HttpPost("obtain")]
@@ -48,15 +44,19 @@ namespace Coordinator.Controllers
             var handler = new JwtSecurityTokenHandler();
             var descriptor = new SecurityTokenDescriptor
             {
+                Issuer = ApiSecurityService.Issuer,
+                Audience = ApiSecurityService.Audience,
+
+                IssuedAt = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = _credentials,
+
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, user.Id),
                     new Claim(ClaimTypes.Role, "Owner"), // TODO: TEST ONLY!!!!
                     //new Claim("Organisation", user.OrganisationId.ToString())
-                }),
-
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = _credentials
+                })
             };
 
             var jwt = handler.CreateToken(descriptor);
