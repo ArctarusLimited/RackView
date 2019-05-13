@@ -1,0 +1,29 @@
+{
+    "database": {
+        "sqlserver": {
+            "default": true,
+            "scenario": "dev",
+
+            "connection": {
+                "server": "(localdb)\\mssqllocaldb",
+                "database": "Rack.Coordinator.DevDb",
+                "trusted": true,
+                "retrycount": 0
+            }
+        }
+    },
+
+    "security": {
+        "providers": {
+            "local": {
+                "enabled": true,
+                "default": true
+            }
+        },
+
+        "api-token": {
+            "key": "LLZmU7s65Ac6B6Zbrqd2HzgL",
+            "expiry": "7d"
+        }
+    }
+}

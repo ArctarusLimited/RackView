@@ -1,0 +1,81 @@
+﻿@page
+@model ApiTokensModel
+@{
+    ViewData["Title"] = "API Tokens";
+    ViewData["ActivePage"] = ManageNavPages.ApiTokens;
+}
+
+<h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Expiry</th>
+                    <th scope="col">Notes</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var token in Model.ApiTokens)
+                {
+                    <tr>
+                        <td>@token.Expiry</td>
+                        <td>@token.Notes</td>
+                        <td><button class="btn btn-danger" onclick="deleteToken(@token.Id)">Delete</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button class="btn btn-success" id="newTokenBtn" onclick="newToken()">New Token</button>
+    </div>
+</div>
+
+<div class="modal fade" id="apiTokenModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="create-key-form" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">New API token</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Copy the token. For security reasons, it will only be shown once.</p>
+                    <!--<label asp-for="Input.Token"></label>-->
+                    <input class="form-control" id="newTokenField" disabled />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Create</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        function newToken() {
+            $.ajax({
+                url: "?handler=Generate",
+                type: "POST",
+                dataType: "json",
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function(data) {
+                    $('#newTokenField').val(data["token"]);
+                    $('#apiTokenModal').modal('show');
+                }
+            });
+        }
+    </script>
+}

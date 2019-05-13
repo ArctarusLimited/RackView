@@ -1,0 +1,10 @@
+{
+    "discovery": {
+        "v4": {
+            "enabled": true,
+            "ranges": {
+                
+            }
+        }
+    }
+}
