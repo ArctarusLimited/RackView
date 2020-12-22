@@ -53,9 +53,8 @@ namespace Coordinator.Controllers
 
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, user.Id),
-                    new Claim(ClaimTypes.Role, "Owner"), // TODO: TEST ONLY!!!!
-                    //new Claim("Organisation", user.OrganisationId.ToString())
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim("CompanyId", user.OrganisationId.ToString()) // TODO: remove?
                 })
             };
 

@@ -61,7 +61,7 @@
     <script type="text/javascript">
         function fullRefresh() {
             $.ajax({
-                url: "/api/v0/Token/All",
+                url: "/Identity/Token/All",
                 type: "GET",
                 dataType: "json",
                 headers: {
@@ -93,7 +93,7 @@
 
         function newToken() {
             $.ajax({
-                url: "/api/v0/Token",
+                url: "/Identity/Token",
                 type: "POST",
                 dataType: "json",
                 headers: {
@@ -126,7 +126,7 @@
 
         function updateToken(token) {
             $.ajax({
-                url: "/api/v0/Token",
+                url: "/Identity/Token",
                 type: "PUT",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(token),
@@ -139,7 +139,7 @@
 
         function deleteToken(id) {
             $.ajax({
-                url: "/api/v0/Token",
+                url: "/Identity/Token",
                 type: "DELETE",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify({ id: id }),

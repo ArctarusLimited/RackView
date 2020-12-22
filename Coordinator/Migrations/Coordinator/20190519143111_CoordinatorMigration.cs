@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Coordinator.Migrations
+namespace Coordinator.Migrations.Coordinator
 {
-    public partial class InitialCreate : Migration
+    public partial class CoordinatorMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

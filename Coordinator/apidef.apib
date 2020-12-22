@@ -1,0 +1,125 @@
+FORMAT: 1A
+
+# Coordinator
+
+The RackView Coordinator Northbound API allows you to perform operations related to the management and control of
+cabinets, cabinet supervisors, and the coordinator itself.
+
+All configuration is done through a namespace system called SRN (Supervisor Resource Name).
+
+# Group Authentication
+
+Resources related to API authentication, including obtaining JWT tokens.
+
+## Jwt [/jwt]
+
+### Obtain Token [POST/jwt/obtain]
+This endpoint allows you to obtain a JWT token for use to authenticate yourself to all other API methods.
+
++ Request (application/json)
+    "0hL/9X1UDF+7TfsuUVe9u2=="
+
++ Response 200 (application/json)
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImp0aSI6ImIzYmY4ZThlLWNkYzItNDI0Yy1hNmJiLTdmMGJlZWQyNmFmNyIsImlhdCI6MTU1Nzg1NTE0MiwiZXhwIjoxNTU3ODU4NzQyfQ.1itPuL2QEtiP8gex-jB_VT7MYRj9yvkHe9jUy77Qang"
+
+# Group Configuration
+
+## Srn Repository [/config/{srn}]
+
++ Parameters
+    + srn: urn:srn:v0:global:test (required, string) - Fully or partially qualified SRN path.
+
++ Headers
+    Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImp0aSI6ImIzYmY4ZThlLWNkYzItNDI0Yy1hNmJiLTdmMGJlZWQyNmFmNyIsImlhdCI6MTU1Nzg1NTE0MiwiZXhwIjoxNTU3ODU4NzQyfQ.1itPuL2QEtiP8gex-jB_VT7MYRj9yvkHe9jUy77Qang"
+
+### Get Value [GET]
+
+This endpoint retrieves the value at the specified SRN from the Coordinator.
+
+In the case that the SRN is not fully qualified, the Coordinator will attempt to return
+a JSON object containing the full scope of the SRN. For certain providers (i.e. vault)
+this is not supported. Please see the documentation of the specific provider and/or route for more info.
+
+Passing "any" as the provider here or specifying multiple providers will attempt to use all
+available or the providers you have passed to retrieve the value if it is not found at one.
+Partially qualified SRNs are not supported.
+
++ Request (application/json)
+    {
+        "provider": "default"
+    }
+
++ Response 200 (application/json)
+    "foo"
+
+### Set Value [PUT]
+
++ Request (application/json)
+    {
+        "data": "foo",
+        "provider": "default"
+    }
+
++ Response 200
+
+### Remove Value [DELETE]
+
++ Response 200
+
+# Group Supervisors
+
+Resources related to managing racks and rack Supervisors.
+
+## Supervisors [/supervisors/{id}]
+
++ Parameters
+    + id: `a007299e-06b7-41ad-ab24-3a640383400c` (required, string) - The unique universal identifier of the supervisor.
+
+Manage rack supervisors.
+
+### Get Supervisor [GET]
+
+This action displays information about the current state of a Supervisor.
+
++ Response 200
+    {
+        "uuid": "a007299e-06b7-41ad-ab24-3a640383400c",
+        "hostname": "rack12.stir.prod.arctarus.co.uk",
+        "mac_address": "00:B0:FC:0D:A0:B0",
+        "mode": "Production",
+        "state": "Online",
+        "heartbeat": "Active",
+        "heartbeat-time": "2019-10-14T22:11:20+0000"
+    }
+
+### Create Supervisor [POST]
+
+This action allows you to pre-stage a Supervisor in the database for later discovery and auto-enrollment.
+By pre-staging a device you eliminate the act of manually approving it.
+
+Alternatively, you may provide a hostname of a Supervisor in Initialisation Mode to directly enroll it.
+
++ Request (application/json) 
+    {
+        "hostname": "rack12.stir.prod.arctarus.co.uk"
+    }
+
++ Response 200
+    {
+        "uuid": "a007299e-06b7-41ad-ab24-3a640383400c",
+        "hostname": "rack12.stir.prod.arctarus.co.uk",
+        "mode": "Initialisation",
+        "state": "Enrolling",
+        "heartbeat": "Inactive",
+        "heartbeat-time": null
+    }
+
+### Update Supervisor [PUT]
+
+This action allows you to update a Supervisor to, for example, change the assigned rack. See documentation for supported parameters.
+Please note Supervisor configuration is done via the SRN endpoints.
+
+### Delete Supervisor [DELETE]
+
+This action allows you to un-enroll a Supervisor.
+The Supervisor will be reset to Initialisation Mode and removed from management.

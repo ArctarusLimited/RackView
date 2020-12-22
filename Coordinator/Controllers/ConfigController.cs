@@ -16,15 +16,19 @@ namespace Coordinator.Controllers
     public class ConfigController : Controller
     {
         private readonly ISrnRepository _service;
-        public ConfigController(ISrnRepository service)
+        private readonly ISrnSecurityService _security;
+        public ConfigController(ISrnRepository service, ISrnSecurityService security)
         {
             _service = service;
+            _security = security;
         }
 
         // GET api/v0/config/urn:srn:v0:global:discovery.v4.enabled
         [HttpGet("{key}")]
         public async Task<IActionResult> Get(string key, SrnDto value)
         {
+            if (!await _security.Match(key, User)) return Forbid();
+
             try
             {
                 var srn = (Srn) key;
@@ -46,6 +50,8 @@ namespace Coordinator.Controllers
         [HttpPut("{key}")]
         public async Task<IActionResult> Put(string key, SrnDto value)
         {
+            if (!await _security.Match(key, User)) return Forbid();
+
             try
             {
                 if (value.Data == null)
@@ -68,6 +74,8 @@ namespace Coordinator.Controllers
         [HttpDelete("{key}")]
         public async Task<IActionResult> Delete(string key, SrnDto value)
         {
+            if (!await _security.Match(key, User)) return Forbid();
+
             try
             {
                 var srn = (Srn)key;

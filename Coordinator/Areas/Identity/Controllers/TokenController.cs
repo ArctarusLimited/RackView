@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Coordinator.Areas.Identity.Data;
-using Coordinator.Areas.Identity.Pages.Account.Manage;
 using Coordinator.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Coordinator.Controllers
+namespace Coordinator.Areas.Identity.Controllers
 {
-    [Route("api/v0/[controller]")]
+    [Route("Identity/[controller]")]
     [ValidateAntiForgeryToken]
     [ApiController]
     [Authorize]

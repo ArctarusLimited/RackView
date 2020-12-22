@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Coordinator.Migrations.Identity
+namespace Coordinator.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20190512224726_ApiTokens4")]
-    partial class ApiTokens4
+    [Migration("20190519143036_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -27,9 +27,13 @@ namespace Coordinator.Migrations.Identity
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("Expiry");
+                    b.Property<DateTime?>("Expiry");
 
-                    b.Property<string>("Token");
+                    b.Property<string>("Notes")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("Token")
+                        .HasMaxLength(32);
 
                     b.Property<string>("UserId");
 
@@ -40,14 +44,32 @@ namespace Coordinator.Migrations.Identity
 
             modelBuilder.Entity("Coordinator.Areas.Identity.Data.Organisation", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name");
 
                     b.Property<string>("OwnerId");
 
                     b.HasKey("Id");
 
                     b.ToTable("Organisations");
+                });
+
+            modelBuilder.Entity("Coordinator.Areas.Identity.Data.SrnAuthAssignment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("OrganisationId");
+
+                    b.Property<string>("Route");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SrnAuthAssignments");
                 });
 
             modelBuilder.Entity("Coordinator.Areas.Identity.Data.User", b =>
@@ -65,6 +87,8 @@ namespace Coordinator.Migrations.Identity
 
                     b.Property<bool>("EmailConfirmed");
 
+                    b.Property<bool>("IsAdmin");
+
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
@@ -75,7 +99,7 @@ namespace Coordinator.Migrations.Identity
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
 
-                    b.Property<Guid?>("OrganisationId");
+                    b.Property<int?>("OrganisationId");
 
                     b.Property<string>("PasswordHash");
 

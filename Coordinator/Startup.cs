@@ -8,6 +8,7 @@ using Coordinator.Models.Config.Json;
 using Coordinator.Models.Config.Vault;
 using Coordinator.Models.Database;
 using Coordinator.Services;
+using Coordinator.Services.Implementations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;

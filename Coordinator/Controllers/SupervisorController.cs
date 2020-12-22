@@ -10,5 +10,6 @@ namespace Coordinator.Controllers
     [ApiController]
     public class SupervisorController : ControllerBase
     {
+
     }
 }

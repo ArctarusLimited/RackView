@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Coordinator.Models.Config;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Coordinator.Services
+namespace Coordinator.Services.Implementations
 {
     /// <summary>
     /// Base implementation of <see cref="ISrnRepository"/>.

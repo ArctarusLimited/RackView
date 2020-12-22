@@ -8,7 +8,9 @@ namespace Coordinator.Areas.Identity.Data
     public class Organisation
     {
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+
 
         // Foreign keys
         public string OwnerId { get; set; }

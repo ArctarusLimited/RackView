@@ -15,6 +15,8 @@ namespace Coordinator.Areas.Identity.Data
         public DbSet<Organisation> Organisations { get; set; }
         public DbSet<ApiToken> ApiTokens { get; set; }
 
+        public DbSet<SrnAuthAssignment> SrnAuthAssignments { get; set; }
+
         // ReSharper disable once SuggestBaseTypeForParameter
         public IdentityContext(DbContextOptions<IdentityContext> options, IServiceProvider provider) : base(options)
         {

@@ -5,7 +5,12 @@ namespace Coordinator.Areas.Identity.Data
 {
     public class User : IdentityUser
     {
-        public Guid? OrganisationId { get; set; }
+        /// <summary>
+        /// Whether the user is a server admin.
+        /// </summary>
+        public bool IsAdmin { get; set; }
+
+        public int? OrganisationId { get; set; }
         public Organisation Organisation { get; set; }
     }
 }

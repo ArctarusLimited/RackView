@@ -1,0 +1,9 @@
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\bin\Debug\netstandard2.0\RackShared.deps.json
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\bin\Debug\netstandard2.0\RackShared.dll
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\bin\Debug\netstandard2.0\RackShared.pdb
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\obj\Debug\netstandard2.0\RackShared.csprojAssemblyReference.cache
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\obj\Debug\netstandard2.0\RackShared.csproj.CoreCompileInputs.cache
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\obj\Debug\netstandard2.0\RackShared.AssemblyInfoInputs.cache
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\obj\Debug\netstandard2.0\RackShared.AssemblyInfo.cs
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\obj\Debug\netstandard2.0\RackShared.dll
+C:\Users\josephmarsden\source\repos\RackSupervisor\RackShared\obj\Debug\netstandard2.0\RackShared.pdb
